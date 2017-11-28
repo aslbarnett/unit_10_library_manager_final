@@ -1,8 +1,8 @@
 p
-    a(href='#', class='button') Create New Book
+    a(href=`${books ? '/books/new' : '/loans/new'}`, class='button') Create New #{books ? 'Book' : 'Loan'}
 p
     | Filters
-    a(href='#')  All
+    a(href=`${books ? '/books' : '/loans'}`)  All
     |  |
     a(href='#')  Overdue
     |  |
