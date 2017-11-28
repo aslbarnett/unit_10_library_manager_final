@@ -1,23 +1,78 @@
 table
     thead
-        tr
-            th Title
-            |
-            th Author
-            |
-            th Genre
-            |
-            th Year Released
+        if table === 'book'
+            tr
+                th Title
+                |
+                th Author
+                |
+                th Genre
+                |
+                th Year Released
+        else if table === 'loan'
+            tr
+                th Book
+                |
+                th Patron
+                |
+                th Loaned on
+                |
+                th Return by
+                |
+                th Returned on
+                |
+                th Action
+        else if table === 'patron'
+            tr
+                th Name
+                |
+                th Address
+                |
+                th Email
+                |
+                th Library ID
+                |
+                th Zip
+
     |
     tbody
-        each book in books
+        if table === 'book'
+            each book in books
+                tr
+                    td
+                        a(href=`/books/${book.id}`)= book.title
+                    |
+                    td= book.author
+                    |
+                    td= book.genre
+                    |
+                    td= book.first_published
+                |
+        else if table === 'loan'
             tr
                 td
-                    a(href=`/books/${book.id}`)= book.title
+                    a(href='#') Emma
                 |
-                td= book.author
+                td
+                    a(href='#') Dave McFarland
                 |
-                td= book.genre
+                td 2015-12-10
                 |
-                td= book.first_published
-            |
+                td 2020-10-20
+                |
+                td
+                |
+                td
+                    a.button(href='#') Return Book
+        else if table === 'patron'
+            tr
+                td
+                    a(href='#') Andrew Chalkley
+                |
+                td 1234 NE 20st St
+                |
+                td andrew.chalkley@teamtreehouse.com
+                |
+                td MCL1001
+                |
+                td 90210

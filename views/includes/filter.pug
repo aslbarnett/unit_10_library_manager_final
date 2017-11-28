@@ -4,6 +4,6 @@ p
     | Filters
     a(href=`${books ? '/books' : '/loans'}`)  All
     |  |
-    a(href='#')  Overdue
+    a(href=`${books ? '/books/overdue' : '/loans/overdue'}`)  Overdue
     |  |
-    a(href='#')  Checked Out
+    a(href=`${books ? '/books/checked' : '/loans/checked'}`)  Checked Out

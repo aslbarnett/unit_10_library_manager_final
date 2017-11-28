@@ -5,7 +5,25 @@ const Book = require('../models').book;
 // GET all books
 router.get('/', (req, res, next) => {
     Book.findAll({ order: [['title', 'DESC']] }).then(books => {
-        res.render('books/all', { books, title: 'Books' });
+        res.render('books/all', { books, title: 'Books', table: 'book' });
+    }).catch(err => {
+        res.sendStatus(500);
+    });
+});
+
+// GET overdue books
+router.get('/overdue', (req, res, next) => {
+    Book.findAll({ order: [['title', 'DESC']] }).then(books => {
+        res.render('books/all', { books, title: 'Overdue Books', table: 'book' });
+    }).catch(err => {
+        res.sendStatus(500);
+    });
+});
+
+// GET checked out books
+router.get('/checked', (req, res, next) => {
+    Book.findAll({ order: [['title', 'DESC']] }).then(books => {
+        res.render('books/all', { books, title: 'Checked Out Books', table: 'book' });
     }).catch(err => {
         res.sendStatus(500);
     });
@@ -18,22 +36,25 @@ router.get('/new', (req, res, next) => {
 
 // POST new book
 router.post('/new', (req, res, next) => {
-    Book.create(req.body).then(book => {
-        console.log(book);
-        res.redirect(`/books/${book.id}`);
-    }).catch(err => {
-        if (err.name = 'SequelizeValidationError') {
-            res.render('books/new', {
-                book: Book.build(req.body),
-                title: 'New Book',
-                error: err.errors
-            });
-        } else {
-            throw err;
-        }
-    }).catch(err => {
-        res.sendStatus(500);
-    });
+    if (req.body.title && req.body.author && req.body.genre) {
+        Book.create(req.body).then(book => {
+            res.redirect('/books');
+        }).catch(err => {
+            if (err.name = 'SequelizeValidationError') {
+                res.render('books/new', {
+                    book: Book.build(req.body),
+                    title: 'New Book',
+                    error: err.errors
+                });
+            } else {
+                throw err;
+            }
+        }).catch(err => {
+            res.sendStatus(500);
+        });
+    } else {
+        res.render('books/new', { title: 'New Book', message: 'Title, Author and Genre fields are required.' });
+    }
 });
 
 // GET individual book

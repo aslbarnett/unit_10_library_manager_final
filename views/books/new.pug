@@ -1,6 +1,9 @@
 extends ../layout
 
 block content
+    if message
+        p= message
+
     form(action='/books/new', method='post')
         p
             label(for='title') Title
