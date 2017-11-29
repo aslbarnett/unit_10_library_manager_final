@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Loan = require('../models').loan;
+const Book = require('../models').book;
+const Patron = require('../models').patron;
 
 
 // GET all loans
@@ -32,7 +34,10 @@ router.get('/checked', (req, res, next) => {
 
 // GET new loan page
 router.get('/new', (req, res, next) => {
-    res.render('loans/new', { title: 'New Loan' });
+    const allBooks = Book.findAll({ order: [['title', 'DESC']] });
+    Promise.all([allBooks]).then(info => {
+        res.render('loans/new', { title: 'New Loan', books: info[0] });
+    });
 });
 
 module.exports = router;

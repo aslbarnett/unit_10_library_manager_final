@@ -36,7 +36,11 @@ router.get('/new', (req, res, next) => {
 
 // POST new book
 router.post('/new', (req, res, next) => {
-    if (req.body.title && req.body.author && req.body.genre) {
+    let reg = new RegExp('^\\d{4}$');
+    if (req.body.first_published !== '' && reg.test(req.body.first_published) === false) {
+        res.render('books/new', { title: 'New Book', message: 'Please enter a 4 digit year e.g. 1997 or 1963' });
+
+    } else {
         Book.create(req.body).then(book => {
             res.redirect('/books');
         }).catch(err => {
@@ -52,8 +56,6 @@ router.post('/new', (req, res, next) => {
         }).catch(err => {
             res.sendStatus(500);
         });
-    } else {
-        res.render('books/new', { title: 'New Book', message: 'Title, Author and Genre fields are required.' });
     }
 });
 

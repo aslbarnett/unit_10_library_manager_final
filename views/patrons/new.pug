@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-    form
+    form(action='/patrons/new', method='post')
         p
             label(for='first_name') First Name
             input#first_name(type='text')

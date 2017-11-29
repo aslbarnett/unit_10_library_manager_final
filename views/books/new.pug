@@ -1,8 +1,14 @@
 extends ../layout
 
 block content
+    if error
+        ul
+            each err in error
+                li #{err.message}
+
     if message
-        p= message
+        ul
+            li #{message}
 
     form(action='/books/new', method='post')
         p

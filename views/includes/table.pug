@@ -49,30 +49,32 @@ table
                     td= book.first_published
                 |
         else if table === 'loan'
-            tr
-                td
-                    a(href='#') Emma
-                |
-                td
-                    a(href='#') Dave McFarland
-                |
-                td 2015-12-10
-                |
-                td 2020-10-20
-                |
-                td
-                |
-                td
-                    a.button(href='#') Return Book
+            each loan in loans
+                tr
+                    td
+                        a(href='#') Emma
+                    |
+                    td
+                        a(href='#') Dave McFarland
+                    |
+                    td 2015-12-10
+                    |
+                    td 2020-10-20
+                    |
+                    td
+                    |
+                    td
+                        a.button(href='#') Return Book
         else if table === 'patron'
-            tr
-                td
-                    a(href='#') Andrew Chalkley
-                |
-                td 1234 NE 20st St
-                |
-                td andrew.chalkley@teamtreehouse.com
-                |
-                td MCL1001
-                |
-                td 90210
+            each patron in patrons
+                tr
+                    td
+                        a(href='#')= patron.first_name + ' ' + patron.last_name
+                    |
+                    td 1234 NE 20st St
+                    |
+                    td andrew.chalkley@teamtreehouse.com
+                    |
+                    td MCL1001
+                    |
+                    td 90210

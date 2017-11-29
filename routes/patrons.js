@@ -17,4 +17,23 @@ router.get('/new', (req, res, next) => {
     res.render('patrons/new', { title: 'New Patron' });
 });
 
+// POST new patron page
+router.post('/new', (req, res, next) => {
+    Patron.create(req.body).then(patron => {
+        res.redirect('/patrons');
+    }).catch(err => {
+        if (err.name = 'SequelizeValidationError') {
+            res.render('patrons/new', {
+                patron: Patron.build(req.body),
+                title: 'New Patron',
+                error: err.errors
+            });
+        } else {
+            throw err;
+        }
+    }).catch(err => {
+        res.sendStatus(500);
+    });
+});
+
 module.exports = router;
