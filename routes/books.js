@@ -85,8 +85,6 @@ router.get('/:id', (req, res, next) => {
     const getBookId = Book.findById(req.params.id);
     const getLoansForBook = Loan.findAll({ where: { book_id: req.params.id }, include: { model: Patron } });
     Promise.all([getBookId, getLoansForBook]).then(info => {
-        console.log(info[0]);
-        console.log(info[1]);
         if (info[0]) {
             res.render('books/detail', { book: info[0], loans: info[1], title: info[0].title });
         } else {
