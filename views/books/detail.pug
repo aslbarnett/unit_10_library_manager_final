@@ -39,18 +39,19 @@ block content
                     th Action
             |
             tbody
-                tr
-                    td
-                        a(href='#') A Brief History of Time
-                    |
-                    td
-                        a(href='#') Andrew Chalkley
-                    |
-                    td 2015-12-12
-                    |
-                    td 2015-12-19
-                    |
-                    td
-                    |
-                    td
-                        a.button(href='#') Return Book
+                each loan in loans
+                    tr
+                        td
+                            a(href='#')= book.title
+                        |
+                        td
+                            a(href='#')= loan.Patron.first_name + ' ' + loan.Patron.last_name
+                        |
+                        td= loan.loaned_on
+                        |
+                        td 2015-12-19
+                        |
+                        td
+                        |
+                        td
+                            a.button(href='#') Return Book

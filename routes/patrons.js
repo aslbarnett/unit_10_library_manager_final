@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Patron = require('../models').patron;
+const Patron = require('../models').Patron;
 
 
 // GET all patrons

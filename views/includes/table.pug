@@ -52,10 +52,10 @@ table
             each loan in loans
                 tr
                     td
-                        a(href='#')= #{loan.Book.title}
+                        a(href='#')= loan.Book.title
                     |
                     td
-                        a(href='#')= loan.patron_id
+                        a(href='#')= loan.Patron.first_name + ' ' + loan.Patron.last_name
                     |
                     td= loan.loaned_on
                     |

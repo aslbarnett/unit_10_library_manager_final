@@ -1,19 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const Book = require('../models').book;
+const Book = require('../models').Book;
+const Loan = require('../models').Loan;
+const Patron = require('../models').Patron;
 
-// GET all books
+
+/* ***------------------***----------------------***
+    <GET> all books
+***---------------------***-------------------*** */
+
 router.get('/', (req, res, next) => {
     Book.findAll({ order: [['title', 'DESC']] }).then(books => {
-        console.log('================ BOOKS ================');
-        console.log(books);
         res.render('books/all', { books, title: 'Books', table: 'book' });
     }).catch(err => {
         res.sendStatus(500);
     });
 });
 
-// GET overdue books
+/* ***------------------***----------------------***
+    <GET> overdue books
+***---------------------***-------------------*** */
+
 router.get('/overdue', (req, res, next) => {
     Book.findAll({ order: [['title', 'DESC']] }).then(books => {
         res.render('books/all', { books, title: 'Overdue Books', table: 'book' });
@@ -22,21 +29,30 @@ router.get('/overdue', (req, res, next) => {
     });
 });
 
-// GET checked out books
+/* ***------------------***----------------------***
+    <GET> checked out books
+***---------------------***-------------------*** */
+
 router.get('/checked', (req, res, next) => {
-    Book.findAll({ order: [['title', 'DESC']] }).then(books => {
+    Book.findAll({ order: [['title', 'DESC']], include: { model: Loan, where: { returned_on: null } } }).then(books => {
         res.render('books/all', { books, title: 'Checked Out Books', table: 'book' });
     }).catch(err => {
         res.sendStatus(500);
     });
 });
 
-// GET new book page
+/* ***------------------***----------------------***
+    <GET> new book page
+***---------------------***-------------------*** */
+
 router.get('/new', (req, res, next) => {
     res.render('books/new', { title: 'New Book' });
 });
 
-// POST new book
+/* ***------------------***----------------------***
+    <POST> new book
+***---------------------***-------------------*** */
+
 router.post('/new', (req, res, next) => {
     let reg = new RegExp('^\\d{4}$');
     if (req.body.first_published !== '' && reg.test(req.body.first_published) === false) {
@@ -61,11 +77,18 @@ router.post('/new', (req, res, next) => {
     }
 });
 
-// GET individual book
+/* ***------------------***----------------------***
+    <GET> individual book
+***---------------------***-------------------*** */
+
 router.get('/:id', (req, res, next) => {
-    Book.findById(req.params.id).then(book => {
-        if (book) {
-            res.render('books/detail', { book, title: book.title });
+    const getBookId = Book.findById(req.params.id);
+    const getLoansForBook = Loan.findAll({ where: { book_id: req.params.id }, include: { model: Patron } });
+    Promise.all([getBookId, getLoansForBook]).then(info => {
+        console.log(info[0]);
+        console.log(info[1]);
+        if (info[0]) {
+            res.render('books/detail', { book: info[0], loans: info[1], title: info[0].title });
         } else {
             res.sendStatus(404);
         }

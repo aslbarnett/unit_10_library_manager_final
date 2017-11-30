@@ -1,17 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const Loan = require('../models').loan;
-const Book = require('../models').book;
-const Patron = require('../models').patron;
+const Loan = require('../models').Loan;
+const Book = require('../models').Book;
+const Patron = require('../models').Patron;
 const helper = require('../helper');
 
 
 // GET all loans
 router.get('/', (req, res, next) => {
-    Loan.findAll({ include: [{model: Book}] }).then(loans => {
-        console.log('================ LOANS ================');
-        console.log(loans[0].Book);
-        console.log(loans[0].book_id);
+    Loan.findAll({ include: [{model: Book}, {model: Patron}] }).then(loans => {
         res.render('loans/all', { loans, title: 'Loans', table: 'loan' });
     }).catch(err => {
         res.sendStatus(500);

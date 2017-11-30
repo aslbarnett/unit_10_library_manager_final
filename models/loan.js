@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-    var loan = sequelize.define('loan', {
+    const Loan = sequelize.define('Loan', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -11,14 +11,13 @@ module.exports = (sequelize, DataTypes) => {
         loaned_on: DataTypes.DATE,
         return_by: DataTypes.DATE,
         returned_on: DataTypes.DATE
-    }, {
-        classMethods: {
-            associate: function (models) {
-                // associations can be defined here
-                loan.belongsTo(models.book, { foreignKey: "book_id" });
-                loan.belongsTo(models.patron, { foreignKey: "patron_id" });
-            }
-        }
     });
-    return loan;
+
+    // Class method
+    Loan.associate = function(models) {
+        Loan.belongsTo(models.Book, { foreignKey: "book_id" });
+        Loan.belongsTo(models.Patron, { foreignKey: "patron_id" });
+    };
+
+    return Loan;
 };

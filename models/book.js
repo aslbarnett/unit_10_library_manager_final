@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-    var book = sequelize.define('book', {
+    const Book = sequelize.define('Book', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -31,13 +31,12 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         first_published: DataTypes.INTEGER
-    }, {
-        classMethods: {
-            associate: function (models) {
-                // associations can be defined here
-                book.hasOne(models.loan, { foreignKey: "book_id" });
-            }
-        }
     });
-    return book;
+
+    // Class Method
+    Book.associate = function(models) {
+        Book.hasMany(models.Loan, { foreignKey: "book_id" });
+    };
+
+    return Book;
 };
