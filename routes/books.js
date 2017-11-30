@@ -5,6 +5,8 @@ const Book = require('../models').book;
 // GET all books
 router.get('/', (req, res, next) => {
     Book.findAll({ order: [['title', 'DESC']] }).then(books => {
+        console.log('================ BOOKS ================');
+        console.log(books);
         res.render('books/all', { books, title: 'Books', table: 'book' });
     }).catch(err => {
         res.sendStatus(500);

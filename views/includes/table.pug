@@ -52,14 +52,14 @@ table
             each loan in loans
                 tr
                     td
-                        a(href='#') Emma
+                        a(href='#')= #{loan.Book.title}
                     |
                     td
-                        a(href='#') Dave McFarland
+                        a(href='#')= loan.patron_id
                     |
-                    td 2015-12-10
+                    td= loan.loaned_on
                     |
-                    td 2020-10-20
+                    td= loan.return_by
                     |
                     td
                     |
@@ -71,10 +71,10 @@ table
                     td
                         a(href='#')= patron.first_name + ' ' + patron.last_name
                     |
-                    td 1234 NE 20st St
+                    td= patron.address
                     |
-                    td andrew.chalkley@teamtreehouse.com
+                    td= patron.email
                     |
-                    td MCL1001
+                    td= patron.library_id
                     |
-                    td 90210
+                    td= patron.zip_code
