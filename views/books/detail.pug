@@ -1,22 +1,22 @@
 extends ../layout
 
 block content
-    form
+    form(action=`/books/${book.id}`, method='post')
         p
             label(for='title') Title
-            input#title(type='text', value=`${book.title}`)
+            input#title(type='text', value=`${book.title}`, name='title')
         |
         p
             label(for='author') Author
-            input#author(type='text', value=`${book.author}`)
+            input#author(type='text', value=`${book.author}`, name='author')
         |
         p
             label(for='genre') Genre
-            input#genre(type='text', value=`${book.genre}`)
+            input#genre(type='text', value=`${book.genre}`, name='genre')
         |
         p
             label(for='first_published') First Published
-            input#first_published(type='text', value=`${book.first_published}`)
+            input#first_published(type='text', value=`${book.first_published}`, name='first_published')
         |
         p
             input(type='submit', value='Update')
@@ -42,16 +42,16 @@ block content
                 each loan in loans
                     tr
                         td
-                            a(href='#')= book.title
+                            a(href=`/books/${book.id}`)= book.title
                         |
                         td
-                            a(href='#')= loan.Patron.first_name + ' ' + loan.Patron.last_name
+                            a(href=`/patrons/${loan.Patron.id}`)= loan.Patron.first_name + ' ' + loan.Patron.last_name
                         |
                         td= loan.loaned_on
                         |
-                        td 2015-12-19
+                        td= loan.return_by
+                        |
+                        td= loan.returned_on
                         |
                         td
-                        |
-                        td
-                            a.button(href='#') Return Book
+                            a.button(href=`/loans/return/${book.id}`) Return Book

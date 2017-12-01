@@ -6,7 +6,10 @@ const Patron = require('../models').Patron;
 const helper = require('../helper');
 
 
-// GET all loans
+/* ***------------------***----------------------***
+    <GET> all loans
+***---------------------***-------------------*** */
+
 router.get('/', (req, res, next) => {
     Loan.findAll({ include: [{model: Book}, {model: Patron}] }).then(loans => {
         res.render('loans/all', { loans, title: 'Loans', table: 'loan' });
@@ -15,7 +18,10 @@ router.get('/', (req, res, next) => {
     });
 });
 
-// GET overdue loans
+/* ***------------------***----------------------***
+    <GET> overdue loans
+***---------------------***-------------------*** */
+
 router.get('/overdue', (req, res, next) => {
     Loan.findAll({ order: [['loaned_on', 'DESC']] }).then(loans => {
         res.render('loans/all', { loans, title: 'Overdue Loans', table: 'loan' });
@@ -24,7 +30,10 @@ router.get('/overdue', (req, res, next) => {
     });
 });
 
-// GET checked out loans
+/* ***------------------***----------------------***
+    <GET> checked out loans
+***---------------------***-------------------*** */
+
 router.get('/checked', (req, res, next) => {
     Loan.findAll({ order: [['loaned_on', 'DESC']] }).then(loans => {
         res.render('loans/all', { loans, title: 'Checked Out Loans', table: 'loan' });
@@ -33,7 +42,10 @@ router.get('/checked', (req, res, next) => {
     });
 });
 
-// GET new loan page
+/* ***------------------***----------------------***
+    <GET> new loan page
+***---------------------***-------------------*** */
+
 router.get('/new', (req, res, next) => {
     const allBooks = Book.findAll({ order: [['title', 'DESC']], attributes: ['title', 'id'] });
     const allPatrons = Patron.findAll({ order: [['last_name', 'DESC']], attributes: ['first_name', 'last_name', 'id'] });
@@ -44,7 +56,10 @@ router.get('/new', (req, res, next) => {
     });
 });
 
-// POST new loan
+/* ***------------------***----------------------***
+    <POST> new loan
+***---------------------***-------------------*** */
+
 router.post('/new', (req, res, next) => {
     Loan.create(req.body).then(loan => {
         res.redirect('/loans');
@@ -63,4 +78,59 @@ router.post('/new', (req, res, next) => {
     });
 });
 
+/* ***------------------***----------------------***
+    <GET> return book page
+***---------------------***-------------------*** */
+
+router.get('/return/:id', (req, res, next) => {
+    Loan.findOne({
+        where: { book_id: req.params.id }, include: [{ model: Book }, {model: Patron}]
+    }).then(loan => {
+        res.render('loans/return', { title: 'Return Book', loan, date: helper.formatDate(new Date()) });
+    }).catch(err => {
+        res.sendStatus(500);
+    });
+});
+
+
+/* ***------------------***----------------------***
+    <PUT> update return book status
+***---------------------***-------------------*** */
+
+router.post('/return/:id', (req, res, next) => {
+    console.log(req.params.id);
+    Loan.findOne({
+        where: { book_id: req.params.id }
+    }).then(loan => {
+        if (loan) {
+            return loan.update(req.body);
+        } else {
+            res.sendStatus(404);
+        }
+    }).then(loan => {
+        res.redirect('/loans');
+    }).catch(loan => {
+        if (err.name === 'SequelizeValidationError') {
+            res.render('home');
+        } else {
+            throw err;
+        }
+    }).catch(err => {
+        res.sendStatus(500);
+    });
+});
+
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+

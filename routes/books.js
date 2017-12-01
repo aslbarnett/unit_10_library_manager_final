@@ -3,6 +3,7 @@ const router = express.Router();
 const Book = require('../models').Book;
 const Loan = require('../models').Loan;
 const Patron = require('../models').Patron;
+const helper = require('../helper');
 
 
 /* ***------------------***----------------------***
@@ -22,7 +23,8 @@ router.get('/', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.get('/overdue', (req, res, next) => {
-    Book.findAll({ order: [['title', 'DESC']] }).then(books => {
+
+    Book.findAll({ order: [['title', 'DESC']], include: { model: Loan, where: { returned_on: null, return_by: { lt: new Date() } } } }).then(books => {
         res.render('books/all', { books, title: 'Overdue Books', table: 'book' });
     }).catch(err => {
         res.sendStatus(500);
@@ -82,9 +84,9 @@ router.post('/new', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.get('/:id', (req, res, next) => {
-    const getBookId = Book.findById(req.params.id);
+    const getBook = Book.findById(req.params.id);
     const getLoansForBook = Loan.findAll({ where: { book_id: req.params.id }, include: { model: Patron } });
-    Promise.all([getBookId, getLoansForBook]).then(info => {
+    Promise.all([getBook, getLoansForBook]).then(info => {
         if (info[0]) {
             res.render('books/detail', { book: info[0], loans: info[1], title: info[0].title });
         } else {
@@ -95,4 +97,55 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
+/* ***------------------***----------------------***
+    <PUT> update individual book
+***---------------------***-------------------*** */
+
+router.post('/:id', (req, res, next) => {
+    Book.findById(req.params.id).then(book => {
+        if (book) {
+            return book.update(req.body);
+        } else {
+            res.sendStatus(404);
+        }
+    }).then(book => {
+        res.redirect('/books');
+    }).catch(err => {
+        if (err.name === 'SequelizeValidationError') {
+            let book = Book.build(req.body);
+            book.id = req.params.id;
+
+            res.render('books/detail', {
+                book,
+                title: book.title,
+                error: err.errors
+            });
+        } else {
+            throw err;
+        }
+    }).catch(err => {
+        res.sendStatus(500);
+    });
+});
+
+
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
