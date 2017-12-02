@@ -63,8 +63,11 @@ table
                     |
                     td= loan.returned_on
                     |
-                    td
-                        a.button(href=`/loans/return/${loan.Book.id}`) Return Book
+                    if loan.returned_on === null
+                        td
+                            a.button(href=`/loans/return/${loan.Book.id}`) Return Book
+                    else
+                        td
         else if table === 'patron'
             each patron in patrons
                 tr
