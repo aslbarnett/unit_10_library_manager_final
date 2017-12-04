@@ -42,7 +42,7 @@ block content
                 each loan in loans
                     tr
                         td
-                            a(href=`/books/${book.id}`)= book.title
+                            a(href=`/books/book/${book.id}`)= book.title
                         |
                         td
                             a(href=`/patrons/${loan.Patron.id}`)= loan.Patron.first_name + ' ' + loan.Patron.last_name

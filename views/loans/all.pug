@@ -3,3 +3,10 @@ extends ../layout
 block content
     include ../includes/filter
     include ../includes/table
+    form(action=`/loans?=_method=GET`, method='get')
+        p
+            select(id='pageNumber', name='pageNumber')
+                - for (var i = 0; i < pages; i++)
+                    option(value=`${i + 1}`) Page #{i + 1}
+            input(type='submit', value='Go', id='go-button')
+        |

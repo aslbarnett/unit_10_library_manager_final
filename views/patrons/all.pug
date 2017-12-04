@@ -3,4 +3,10 @@ extends ../layout
 block content
     p
         a.button(href='/patrons/new') Create New Patron
+
+    form(action='/patrons?=_method=GET', method='get')
+        p
+            input#search_box(type='text', placeholder='search for patron', name='searchPatron')
+            input#search_button(type='submit', value='Search')
+        |
     include ../includes/table

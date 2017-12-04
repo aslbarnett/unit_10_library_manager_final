@@ -11,9 +11,23 @@ const helper = require('../helper');
 ***---------------------***-------------------*** */
 
 router.get('/', (req, res, next) => {
-    Loan.findAll({ include: [{model: Book}, {model: Patron}] }).then(loans => {
-        res.render('loans/all', { loans, title: 'Loans', table: 'loan' });
-    }).catch(err => {
+    let info = {
+        limit: 5,
+        offset: 0,
+        where: {},
+        order: [[ 'id', 'ASC' ]],
+        include: [{model: Book}, {model: Patron}]
+    };
+
+    if (req.query.pageNumber) {
+        info.offset = (req.query.pageNumber - 1) * info.limit;
+    }
+
+    Loan.findAndCountAll(info)
+        .then(loans => {
+            let pages = Math.ceil(loans.count / info.limit);
+            res.render('loans/all', { loans: loans.rows, title: 'Loans', table: 'loan', count: loans.count, pages });
+        }).catch(err => {
         res.sendStatus(500);
     });
 });
@@ -23,9 +37,23 @@ router.get('/', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.get('/overdue', (req, res, next) => {
-    Loan.findAll({ order: [['loaned_on', 'DESC']] }).then(loans => {
-        res.render('loans/all', { loans, title: 'Overdue Loans', table: 'loan' });
-    }).catch(err => {
+    let info = {
+        limit: 5,
+        offset: 0,
+        where: {returned_on: null, return_by: { lt: new Date() }},
+        order: [[ 'id', 'ASC' ]],
+        include: [{model: Book}, {model: Patron}]
+    };
+
+    if (req.query.pageNumber) {
+        info.offset = (req.query.pageNumber - 1) * info.limit;
+    }
+
+    Loan.findAndCountAll(info)
+        .then(loans => {
+            let pages = Math.ceil(loans.count / info.limit);
+            res.render('loans/all', { loans: loans.rows, title: 'Overdue Loans', table: 'loan', count: loans.count, pages });
+        }).catch(err => {
         res.sendStatus(500);
     });
 });
@@ -35,9 +63,23 @@ router.get('/overdue', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.get('/checked', (req, res, next) => {
-    Loan.findAll({ order: [['loaned_on', 'DESC']] }).then(loans => {
-        res.render('loans/all', { loans, title: 'Checked Out Loans', table: 'loan' });
-    }).catch(err => {
+    let info = {
+        limit: 5,
+        offset: 0,
+        where: {returned_on: null},
+        order: [[ 'id', 'ASC' ]],
+        include: [{model: Book}, {model: Patron}]
+    };
+
+    if (req.query.pageNumber) {
+        info.offset = (req.query.pageNumber - 1) * info.limit;
+    }
+
+    Loan.findAndCountAll(info)
+        .then(loans => {
+            let pages = Math.ceil(loans.count / info.limit);
+            res.render('loans/all', { loans: loans.rows, title: 'Overdue Loans', table: 'loan', count: loans.count, pages });
+        }).catch(err => {
         res.sendStatus(500);
     });
 });
@@ -47,7 +89,7 @@ router.get('/checked', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.get('/new', (req, res, next) => {
-    const allBooks = Book.findAll({ order: [['title', 'DESC']], attributes: ['title', 'id'] });
+    const allBooks = Book.findAll({ order: [['title', 'DESC']], attributes: ['title', 'id']});
     const allPatrons = Patron.findAll({ order: [['last_name', 'DESC']], attributes: ['first_name', 'last_name', 'id'] });
     const todayDate = helper.formatDate(new Date());
     const futureDate = helper.formatFutureDate(new Date(), 7);
@@ -64,15 +106,24 @@ router.post('/new', (req, res, next) => {
     Loan.create(req.body).then(loan => {
         res.redirect('/loans');
     }).catch(err => {
-        if (err.name = 'SequelizeValidationError') {
-            res.render('loans/new', {
-                loan: Loan.build(req.body),
-                title: 'New Loan',
-                error: err.errors
-            });
-        } else {
-            throw err;
-        }
+        const allBooks = Book.findAll({ order: [['title', 'DESC']], attributes: ['title', 'id']});
+        const allPatrons = Patron.findAll({ order: [['last_name', 'DESC']], attributes: ['first_name', 'last_name', 'id'] });
+        const todayDate = helper.formatDate(new Date());
+        const futureDate = helper.formatFutureDate(new Date(), 7);
+        Promise.all([allBooks, allPatrons]).then(info => {
+            if (err.name = 'SequelizeValidationError') {
+                res.render('loans/new', {
+                    books: info[0],
+                    patrons: info[1],
+                    todayDate,
+                    futureDate,
+                    title: 'New Loan',
+                    error: err.errors
+                });
+            } else {
+                throw err;
+            }
+        });
     }).catch(err => {
         res.sendStatus(500);
     });
@@ -98,26 +149,36 @@ router.get('/return/:id', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.post('/return/:id', (req, res, next) => {
-    console.log(req.params.id);
-    Loan.findOne({
-        where: { book_id: req.params.id }
-    }).then(loan => {
-        if (loan) {
-            return loan.update(req.body);
-        } else {
-            res.sendStatus(404);
-        }
-    }).then(loan => {
-        res.redirect('/loans');
-    }).catch(loan => {
-        if (err.name === 'SequelizeValidationError') {
-            res.render('home');
-        } else {
-            throw err;
-        }
-    }).catch(err => {
-        res.sendStatus(500);
-    });
+    let reg = new RegExp('^\\d{4}\\-\\d{1,2}\\-\\d{1,2}$');
+    if (req.body.returned_on !== '' && reg.test(req.body.returned_on) === true) {
+        Loan.findOne({
+            where: { book_id: req.params.id }
+        }).then(loan => {
+            if (loan) {
+                return loan.update(req.body);
+            } else {
+                res.sendStatus(404);
+            }
+        }).then(loan => {
+            res.redirect('/loans');
+        }).catch(loan => {
+            if (err.name === 'SequelizeValidationError') {
+                res.render('home');
+            } else {
+                throw err;
+            }
+        }).catch(err => {
+            res.sendStatus(500);
+        });
+    } else {
+        Loan.findOne({
+            where: { book_id: req.params.id }, include: [{ model: Book }, {model: Patron}]
+        }).then(loan => {
+            res.render('loans/return', { title: 'Return Book', loan, date: helper.formatDate(new Date()), message: 'The returned on date is required in the format YYYY-MM-DD.' });
+        }).catch(err => {
+            res.sendStatus(500);
+        });
+    }
 });
 
 module.exports = router;

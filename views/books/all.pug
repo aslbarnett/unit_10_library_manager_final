@@ -2,4 +2,30 @@ extends ../layout
 
 block content
     include ../includes/filter
+    if type === 'all'
+        form(action='/books?=_method=GET', method='get')
+            p
+                input#search_box(type='text', placeholder='search for book', name='searchBook')
+                input#search_button(type='submit', value='Search')
+            |
+    else if type === 'overdue'
+        form(action='/books/overdue?=_method=GET', method='get')
+            p
+                input#search_box(type='text', placeholder='search for book', name='searchBook')
+                input#search_button(type='submit', value='Search')
+            |
+    else if type === 'checked'
+        form(action='/books/checked?=_method=GET', method='get')
+            p
+                input#search_box(type='text', placeholder='search for book', name='searchBook')
+                input#search_button(type='submit', value='Search')
+            |
+
     include ../includes/table
+    form(action=`/books?=_method=GET`, method='get')
+        p
+            select(id='pageNumber', name='pageNumber')
+                - for (var i = 0; i < pages; i++)
+                    option(value=`${i+1}`) Page #{i+1}
+            input(type='submit', value='Go', id='go-button')
+        |

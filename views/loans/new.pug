@@ -1,6 +1,11 @@
 extends ../layout
 
 block content
+    if error
+        ul
+            each err in error
+                li #{err.message}
+
     form(action='/loans/new', method='post')
         p
             label(for='book_id') Book

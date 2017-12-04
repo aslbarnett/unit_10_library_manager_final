@@ -1,6 +1,10 @@
 extends ../layout
 
 block content
+    if message
+        ul
+            li #{message}
+
     p
         strong Book Title:
             |  #{loan.Book.title}

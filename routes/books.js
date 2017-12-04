@@ -11,11 +11,45 @@ const helper = require('../helper');
 ***---------------------***-------------------*** */
 
 router.get('/', (req, res, next) => {
-    Book.findAll({ order: [['title', 'DESC']] }).then(books => {
-        res.render('books/all', { books, title: 'Books', table: 'book' });
-    }).catch(err => {
-        res.sendStatus(500);
+    let info = {
+        limit: 5,
+        offset: 0,
+        where: {},
+        order: [[ 'id', 'ASC' ]]
+    };
+
+    if (req.query.pageNumber) {
+        info.offset = (req.query.pageNumber - 1) * info.limit;
+    } else if (req.query.searchBook) {
+        let noCaseSearch = req.query.searchBook.toLowerCase();
+        info.where = {
+            $or: [
+                {
+                    title: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    author: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    genre: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                }
+            ]
+        };
+    }
+    Book.findAndCountAll(info)
+        .then(books => {
+            let pages = Math.ceil(books.count / info.limit);
+            res.render('books/all', { type: 'all', books: books.rows, title: 'Books', table: 'book', count: books.count, pages });
+        }).catch(err => {
+            res.sendStatus(500);
     });
+
 });
 
 /* ***------------------***----------------------***
@@ -23,10 +57,44 @@ router.get('/', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.get('/overdue', (req, res, next) => {
+    let info = {
+        limit: 5,
+        offset: 0,
+        where: {},
+        order: [[ 'id', 'ASC' ]],
+        include: {model: Loan, where: { returned_on: null, return_by: { lt: new Date() }}}
+    };
 
-    Book.findAll({ order: [['title', 'DESC']], include: { model: Loan, where: { returned_on: null, return_by: { lt: new Date() } } } }).then(books => {
-        res.render('books/all', { books, title: 'Overdue Books', table: 'book' });
-    }).catch(err => {
+    if (req.query.pageNumber) {
+        info.offset = (req.query.pageNumber - 1) * info.limit;
+    } else if (req.query.searchBook) {
+        let noCaseSearch = req.query.searchBook.toLowerCase();
+        info.where = {
+            $or: [
+                {
+                    title: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    author: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    genre: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                }
+            ]
+        };
+    }
+
+    Book.findAndCountAll(info)
+        .then(books => {
+            let pages = Math.ceil(books.count / info.limit);
+            res.render('books/all', { type: 'overdue', books: books.rows, title: 'Overdue Books', table: 'book', count: books.count, pages });
+        }).catch(err => {
         res.sendStatus(500);
     });
 });
@@ -36,9 +104,44 @@ router.get('/overdue', (req, res, next) => {
 ***---------------------***-------------------*** */
 
 router.get('/checked', (req, res, next) => {
-    Book.findAll({ order: [['title', 'DESC']], include: { model: Loan, where: { returned_on: null } } }).then(books => {
-        res.render('books/all', { books, title: 'Checked Out Books', table: 'book' });
-    }).catch(err => {
+    let info = {
+        limit: 5,
+        offset: 0,
+        where: {},
+        order: [[ 'id', 'ASC' ]],
+        include: { model: Loan, where: { returned_on: null } }
+    };
+
+    if (req.query.pageNumber) {
+        info.offset = (req.query.pageNumber - 1) * info.limit;
+    } else if (req.query.searchBook) {
+        let noCaseSearch = req.query.searchBook.toLowerCase();
+        info.where = {
+            $or: [
+                {
+                    title: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    author: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    genre: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                }
+            ]
+        };
+    }
+
+    Book.findAndCountAll(info)
+        .then(books => {
+            let pages = Math.ceil(books.count / info.limit);
+            res.render('books/all', { type: 'checked', books: books.rows, title: 'Checked Out Books', table: 'book', count: books.count, pages });
+        }).catch(err => {
         res.sendStatus(500);
     });
 });
@@ -83,7 +186,7 @@ router.post('/new', (req, res, next) => {
     <GET> individual book
 ***---------------------***-------------------*** */
 
-router.get('/:id', (req, res, next) => {
+router.get('/book/:id', (req, res, next) => {
     const getBook = Book.findById(req.params.id);
     const getLoansForBook = Loan.findAll({ where: { book_id: req.params.id }, include: { model: Patron } });
     Promise.all([getBook, getLoansForBook]).then(info => {
@@ -101,7 +204,7 @@ router.get('/:id', (req, res, next) => {
     <PUT> update individual book
 ***---------------------***-------------------*** */
 
-router.post('/:id', (req, res, next) => {
+router.post('/book/:id', (req, res, next) => {
     Book.findById(req.params.id).then(book => {
         if (book) {
             return book.update(req.body);

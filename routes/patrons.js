@@ -10,7 +10,35 @@ const Loan = require('../models').Loan;
 ***---------------------***-------------------*** */
 
 router.get('/', (req, res, next) => {
-    Patron.findAll({ order: [['last_name', 'DESC']] }).then(patrons => {
+    let info = {
+        where: {},
+        order: [[ 'id', 'ASC' ]]
+    };
+
+    if (req.query.searchPatron) {
+        let noCaseSearch = req.query.searchPatron.toLowerCase();
+        info.where = {
+            $or: [
+                {
+                    first_name: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    last_name: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                },
+                {
+                    library_id: {
+                        $like: `%${noCaseSearch}%`
+                    }
+                }
+            ]
+        };
+    }
+
+    Patron.findAll(info).then(patrons => {
         res.render('patrons/all', { patrons, title: 'Patrons', table: 'patron' });
     }).catch(err => {
         res.sendStatus(500);
@@ -66,8 +94,35 @@ router.get('/:id', (req, res, next) => {
 });
 
 /* ***------------------***----------------------***
-    <POST> individual loan
+    <PUT> update individual loan
 ***---------------------***-------------------*** */
+
+router.post('/:id', (req, res, next) => {
+    Patron.findById(req.params.id).then(patron => {
+        if (patron) {
+            return patron.update(req.body);
+        } else {
+            res.sendStatus(404);
+        }
+    }).then(patron => {
+        res.redirect('/patrons');
+    }).catch(err => {
+        if (err.name === 'SequelizeValidationError') {
+            let patron = Patron.build(req.body);
+            patron.id = req.params.id;
+
+            res.render('patrons/detail', {
+                patron,
+                title: `Patron: ${patron.first_name} ${patron.last_name}`,
+                error: err.errors
+            });
+        } else {
+            throw err;
+        }
+    }).catch(err => {
+        res.sendStatus(500);
+    });
+});
 
 module.exports = router;
 

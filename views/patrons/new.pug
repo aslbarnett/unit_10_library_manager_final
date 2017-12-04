@@ -1,6 +1,11 @@
 extends ../layout
 
 block content
+    if error
+        ul
+            each err in error
+                li #{err.message}
+
     form(action='/patrons/new', method='post')
         p
             label(for='first_name') First Name

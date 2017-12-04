@@ -6,10 +6,44 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        book_id: DataTypes.INTEGER,
-        patron_id: DataTypes.INTEGER,
-        loaned_on: DataTypes.DATEONLY,
-        return_by: DataTypes.DATEONLY,
+        book_id: {
+            type: DataTypes.INTEGER,
+            validate: {
+                notEmpty: {
+                    msg: 'Book selection required'
+                }
+            }
+        },
+        patron_id: {
+            type: DataTypes.INTEGER,
+            validate: {
+                notEmpty: {
+                    msg: 'Patron name required'
+                }
+            }
+        },
+        loaned_on: {
+            type: DataTypes.DATEONLY,
+            validate: {
+                notEmpty: {
+                    msg: 'Loaned on date required'
+                },
+                isDate: {
+                    msg: 'Please enter a date in the following format: YYYY-MM-DD'
+                }
+            }
+        },
+        return_by: {
+            type: DataTypes.DATEONLY,
+            validate: {
+                notEmpty: {
+                    msg: 'Return by date required'
+                },
+                isDate: {
+                    msg: 'Please enter a date in the following format: YYYY-MM-DD'
+                }
+            }
+        },
         returned_on: DataTypes.DATEONLY
     });
 
